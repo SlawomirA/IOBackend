@@ -15,5 +15,5 @@ public interface NotificationService {
     Optional<NotificationTemplate> getNotificationTemplateById(Long notificationTemplateId);
     ResponseEntity<MyResponse> createNotificationTemplate(NotificationTemplate notificationTemplate);
     ResponseEntity<MyResponse> updateNotificationTemplate(Long notificationId, NotificationTemplate notificationTemplate);
-    NotificationTemplate sendNotification(int userId, Long notificationTemplateId);
+    ResponseEntity<MyResponse> sendNotification(Long userId, Long notificationTemplateId);
 }

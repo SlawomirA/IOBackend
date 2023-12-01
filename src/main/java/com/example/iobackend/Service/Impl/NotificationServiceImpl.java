@@ -3,14 +3,22 @@ package com.example.iobackend.Service.Impl;
 import com.example.iobackend.Model.NotificationLog;
 import com.example.iobackend.Model.NotificationTemplate;
 import com.example.iobackend.Model.Response.MyResponse;
+import com.example.iobackend.Model.User;
 import com.example.iobackend.Repository.NotificationLogRepository;
 import com.example.iobackend.Repository.NotificationTemplateRepository;
+import com.example.iobackend.Repository.UserRepository;
 import com.example.iobackend.Service.NotificationService;
+import com.example.iobackend.Utils.Helper;
+import com.example.iobackend.Utils.InteractionCreationer;
+import com.example.iobackend.Utils.MyMailSender;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +28,13 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationLogRepository notificationLogRepository;
     @Autowired
     private NotificationTemplateRepository notificationTemplateRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private MyMailSender mailSender;
+//    @Autowired
+//    private InteractionCreationer interactionCreationer;
 
     @Override
     public List<NotificationLog> getAllNotificationsLogs() {
@@ -41,14 +56,30 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationTemplateRepository.findById(notificationTemplateId);
     }
 
-    @Override
-    public ResponseEntity<MyResponse> createNotificationTemplate(final NotificationTemplate notificationTemplate) {
+    @Transactional
+    public ResponseEntity<MyResponse> createNotificationTemplate(NotificationTemplate notificationTemplate) {
         try {
-            notificationTemplateRepository.saveAndFlush(notificationTemplate);
+            NotificationTemplate savedTemplate = notificationTemplateRepository.save(notificationTemplate);
+            // Separate transaction for logging
+            logNotification(savedTemplate);
+
             return new ResponseEntity<>(new MyResponse(200, "Success message"), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(new MyResponse(500,"Error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new MyResponse(500, "Error"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void logNotification(NotificationTemplate savedTemplate) {
+        NotificationLog notificationLog = new NotificationLog();
+        notificationLog.setLogDate(new Date());
+        notificationLog.setAttachmentFlag(0);
+        System.out.println("AAA: "+savedTemplate.getTemplateId());
+        notificationLog.setTemplateId(Math.toIntExact(savedTemplate.getTemplateId()));
+        notificationLog.setSenderId(1); // todo: authorization
+        notificationLog.setContent(savedTemplate.getMessage());
+        notificationLog.setDescription(Helper.MESSAGE_SEND_NOTIFICATION);
+        notificationLogRepository.saveAndFlush(notificationLog);
     }
 
     @Override
@@ -64,6 +95,15 @@ public class NotificationServiceImpl implements NotificationService {
 
             notificationTemplateRepository.save(template);
 
+            NotificationLog notificationLog = new NotificationLog();
+            notificationLog.setLogDate(new Date());
+            notificationLog.setAttachmentFlag(0);
+            notificationLog.setTemplateId(Math.toIntExact(notificationId));
+            notificationLog.setSenderId(1);     //todo: authorization
+            notificationLog.setContent(notificationTemplate.getMessage());
+            notificationLog.setDescription(Helper.MESSAGE_SEND_NOTIFICATION);
+            addLog(new NotificationLog());
+
             MyResponse myResponse = new MyResponse(200, "Notification template updated successfully");
             return new ResponseEntity<>(myResponse, HttpStatus.OK);
         } else {
@@ -74,7 +114,38 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationTemplate sendNotification(final int userId, final Long notificationTemplateId) {
-        return null;
+    public ResponseEntity<MyResponse> sendNotification(final Long userId, final Long notificationTemplateId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            String userEmail = user.getEmail();
+
+            NotificationTemplate notificationTemplate = notificationTemplateRepository.findById(notificationTemplateId).orElse(null);
+
+            if (notificationTemplate != null) {
+                mailSender.sendEmail(userEmail, notificationTemplate);
+
+                NotificationLog notificationLog = new NotificationLog();
+                notificationLog.setLogDate(new Date());
+                notificationLog.setAttachmentFlag(0);
+                notificationLog.setTemplateId(Math.toIntExact(notificationTemplateId));
+                notificationLog.setSenderId(1);     //todo: authorization
+                notificationLog.setContent(notificationTemplate.getMessage());
+                notificationLog.setDescription(Helper.MESSAGE_SEND_NOTIFICATION);
+                addLog(new NotificationLog());
+
+                MyResponse myResponse = new MyResponse(200, "Email sended successfully");
+                return new ResponseEntity<>(myResponse, HttpStatus.OK);
+            } else
+                return new ResponseEntity<>(new MyResponse(404,"Notification template not found"), HttpStatus.NOT_FOUND);
+
+        } else
+            return new ResponseEntity<>(new MyResponse(404,"User not found"), HttpStatus.NOT_FOUND);
+
+    }
+
+    void addLog(NotificationLog notificationLog){
+            notificationLogRepository.save(notificationLog);
     }
 }

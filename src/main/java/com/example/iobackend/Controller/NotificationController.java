@@ -117,18 +117,18 @@ public class NotificationController {
     public ResponseEntity<MyResponse> updateNotificationTemplate(@Parameter(description = "ID of the template", example = "1") @PathVariable("id") Long notificationTemplateId, @RequestBody  NotificationTemplate notificationTemplate) {
         return notificationService.updateNotificationTemplate(notificationTemplateId, notificationTemplate);
     }
-//
-//    @PostMapping(value = "/templates/add", produces = MediaType.APPLICATION_JSON_VALUE)
-//    @Operation(summary = "foo", description = "bar")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Success"),
-//            @ApiResponse(responseCode = "400", description = "Bad request"),
-//            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-//            @ApiResponse(responseCode = "403", description = "Forbidden"),
-//            @ApiResponse(responseCode = "404", description = "Not found"),
-//            @ApiResponse(responseCode = "405", description = "Validation error")
-//    })
-    public ResponseEntity<MyResponse> sendNotification(int userId, int notificationTemplateId) {
-        return null;
+
+    @PostMapping(value = "/notifications/send", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "foo", description = "bar")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "405", description = "Validation error")
+    })
+    public ResponseEntity<MyResponse> sendNotification(Long userId, Long notificationTemplateId) {
+        return notificationService.sendNotification(userId, notificationTemplateId);
     }
 }

@@ -11,23 +11,23 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Slf4j
-public class NotificationTemplate {
+public class User {
 
     @Id
     @Column
-    private int templateId;
-
-    @Column
-    private String messageType;
-
-    @Column
-    private String message;
-
-    @Column
-    private String title;
-
-    @Column
     private int userId;
+
+    @Column
+    private String username;
+
+    @Column
+    private String password;
+
+    @Column
+    private Boolean enabled;
+
+    @Column
+    private String email;
 
 
 }
