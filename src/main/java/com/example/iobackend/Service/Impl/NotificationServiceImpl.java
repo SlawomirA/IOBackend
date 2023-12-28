@@ -11,6 +11,7 @@ import com.example.iobackend.Service.NotificationService;
 import com.example.iobackend.Utils.Helper;
 import com.example.iobackend.Utils.InteractionCreationer;
 import com.example.iobackend.Utils.MyMailSender;
+import org.springframework.messaging.MessagingException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -124,7 +125,15 @@ public class NotificationServiceImpl implements NotificationService {
             NotificationTemplate notificationTemplate = notificationTemplateRepository.findById(notificationTemplateId).orElse(null);
 
             if (notificationTemplate != null) {
-                mailSender.sendEmail(userEmail, notificationTemplate);
+                if(notificationTemplate.getMessage().contains("html")) {
+                    try {
+                        mailSender.sendEmailHTML(userEmail,notificationTemplate);
+                    } catch (MessagingException | jakarta.mail.MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                else
+                    mailSender.sendEmail(userEmail, notificationTemplate);
 
                 NotificationLog notificationLog = new NotificationLog();
                 notificationLog.setLogDate(new Date());
