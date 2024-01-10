@@ -66,7 +66,7 @@ public class NotificationServiceImpl implements NotificationService {
 
             return new ResponseEntity<>(new MyResponse(200, "Success message"), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(new MyResponse(500, "Error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new MyResponse(500, "Error: "+e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -75,11 +75,10 @@ public class NotificationServiceImpl implements NotificationService {
         NotificationLog notificationLog = new NotificationLog();
         notificationLog.setLogDate(new Date());
         notificationLog.setAttachmentFlag(0);
-        System.out.println("AAA: "+savedTemplate.getTemplateId());
         notificationLog.setTemplateId(Math.toIntExact(savedTemplate.getTemplateId()));
         notificationLog.setSenderId(1); // todo: authorization
         notificationLog.setContent(savedTemplate.getMessage());
-        notificationLog.setDescription(Helper.MESSAGE_SEND_NOTIFICATION);
+        notificationLog.setDescription(Helper.MESSAGE_CREATE_NOTIFICATION_TEMPLATE + savedTemplate.getTemplateId());
         notificationLogRepository.saveAndFlush(notificationLog);
     }
 
@@ -102,7 +101,7 @@ public class NotificationServiceImpl implements NotificationService {
             notificationLog.setTemplateId(Math.toIntExact(notificationId));
             notificationLog.setSenderId(1);     //todo: authorization
             notificationLog.setContent(notificationTemplate.getMessage());
-            notificationLog.setDescription(Helper.MESSAGE_SEND_NOTIFICATION);
+            notificationLog.setDescription(Helper.MESSAGE_UPDATE_NOTIFICATION_TEMPLATE + notificationTemplate.getUserId());
             addLog(new NotificationLog());
 
             MyResponse myResponse = new MyResponse(200, "Notification template updated successfully");
@@ -125,7 +124,7 @@ public class NotificationServiceImpl implements NotificationService {
             NotificationTemplate notificationTemplate = notificationTemplateRepository.findById(notificationTemplateId).orElse(null);
 
             if (notificationTemplate != null) {
-                if(notificationTemplate.getMessage().contains("html")) {
+                if(notificationTemplate.getHtmlFlag() != 0) {
                     try {
                         mailSender.sendEmailHTML(userEmail,notificationTemplate);
                     } catch (MessagingException | jakarta.mail.MessagingException e) {
@@ -141,8 +140,8 @@ public class NotificationServiceImpl implements NotificationService {
                 notificationLog.setTemplateId(Math.toIntExact(notificationTemplateId));
                 notificationLog.setSenderId(1);     //todo: authorization
                 notificationLog.setContent(notificationTemplate.getMessage());
-                notificationLog.setDescription(Helper.MESSAGE_SEND_NOTIFICATION);
-                addLog(new NotificationLog());
+                notificationLog.setDescription(Helper.MESSAGE_SEND_NOTIFICATION + user.getUserId());
+                addLog(notificationLog);
 
                 MyResponse myResponse = new MyResponse(200, "Email sended successfully");
                 return new ResponseEntity<>(myResponse, HttpStatus.OK);

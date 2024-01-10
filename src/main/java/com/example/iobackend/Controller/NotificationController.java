@@ -119,7 +119,7 @@ public class NotificationController {
     }
 
     @PostMapping(value = "/notifications/send", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "foo", description = "bar")
+    @Operation(summary = "Sends email message", description = "Sends email message to specific user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success"),
             @ApiResponse(responseCode = "400", description = "Bad request"),

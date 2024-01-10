@@ -24,6 +24,9 @@ public class NotificationTemplate {
     private String message;
 
     @Column
+    private int htmlFlag;
+
+    @Column
     private String title;
 
     @Column
