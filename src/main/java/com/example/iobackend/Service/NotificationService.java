@@ -16,4 +16,6 @@ public interface NotificationService {
     ResponseEntity<MyResponse> createNotificationTemplate(NotificationTemplate notificationTemplate);
     ResponseEntity<MyResponse> updateNotificationTemplate(Long notificationId, NotificationTemplate notificationTemplate);
     ResponseEntity<MyResponse> sendNotification(Long userId, Long notificationTemplateId);
+
+    ResponseEntity<?> sendPopup(final Long notificationTemplateId);
 }

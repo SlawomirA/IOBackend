@@ -9,16 +9,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -104,6 +100,21 @@ public class NotificationController {
         return notificationService.createNotificationTemplate(notificationTemplate);
     }
 
+
+    @DeleteMapping(value = "/templates/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Deletes template", description = "Adds notification template to database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "405", description = "Validation error")
+    })
+    public ResponseEntity<MyResponse> deleteNotificationTemplate(@PathVariable("id") Long notificationTemplateID) {
+        return notificationService.deleteNotificationTemplate(notificationTemplateID);
+    }
+
     @PutMapping(value = "/templates/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Updates notification template", description = "Updates specific notification template")
     @ApiResponses(value = {
@@ -130,5 +141,21 @@ public class NotificationController {
     })
     public ResponseEntity<MyResponse> sendNotification(Long userId, Long notificationTemplateId) {
         return notificationService.sendNotification(userId, notificationTemplateId);
+    }
+
+
+    @PostMapping(value = "/notifications/sendPopup/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Sends email message", description = "Sends email message to specific user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "405", description = "Validation error"),
+            @ApiResponse(responseCode = "409", description = "Conflict")
+    })
+    public ResponseEntity<?> sendPopup(@PathVariable("id") Long notificationTemplateId) {
+        return notificationService.sendPopup(notificationTemplateId);
     }
 }

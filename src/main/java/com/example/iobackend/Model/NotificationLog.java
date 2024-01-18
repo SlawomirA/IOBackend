@@ -23,9 +23,6 @@ public class NotificationLog {
     private int templateId;
 
     @Column
-    private int senderId;
-
-    @Column
     private int receiverId;
 
     @Column
