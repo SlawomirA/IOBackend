@@ -154,12 +154,12 @@ public class NotificationController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "405", description = "Validation error")
     })
-    public ResponseEntity<MyResponse> sendNotification(@RequestHeader("X-USER-ROLE") String role,Long userId, Long notificationTemplateId) {
-        System.out.println("ROLE: "+role);
-        if (!role.equals("ROLE_ADMIN")) {
-            MyResponse response = new MyResponse(403,"Forbidden");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-        }
+    public ResponseEntity<MyResponse> sendNotification(Long userId, Long notificationTemplateId) {
+        // System.out.println("ROLE: "+role);
+        // if (!role.equals("ROLE_ADMIN")) {
+        //     MyResponse response = new MyResponse(403,"Forbidden");
+        //     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        // }
         return notificationService.sendNotification(userId, notificationTemplateId);
     }
 
