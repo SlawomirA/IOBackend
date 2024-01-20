@@ -12,10 +12,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +38,11 @@ public class NotificationController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "405", description = "Validation error")
     })
-    private ResponseEntity<List<NotificationLog>> getAllNotificationsLogs() {
+    private ResponseEntity<List<NotificationLog>> getAllNotificationsLogs(@RequestHeader("X-USER-ROLE") String role) {
+        System.out.println("ROLE: "+role);
+        if (!role.equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ArrayList<>());
+        }
         return ResponseEntity.ok(notificationService.getAllNotificationsLogs());
     }
 
@@ -66,7 +72,11 @@ public class NotificationController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "405", description = "Validation error")
     })
-    private ResponseEntity<List<NotificationTemplate>> getAllNotificationsTemplates() {
+    private ResponseEntity<List<NotificationTemplate>> getAllNotificationsTemplates(@RequestHeader("X-USER-ROLE") String role) {
+        System.out.println("ROLE: "+role);
+        if (!role.equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ArrayList<>());
+        }
         return ResponseEntity.ok(notificationService.getAllNotificationsTemplates());
     }
 
@@ -139,7 +149,12 @@ public class NotificationController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "405", description = "Validation error")
     })
-    public ResponseEntity<MyResponse> sendNotification(Long userId, Long notificationTemplateId) {
+    public ResponseEntity<MyResponse> sendNotification(@RequestHeader("X-USER-ROLE") String role,Long userId, Long notificationTemplateId) {
+        System.out.println("ROLE: "+role);
+        if (!role.equals("ROLE_ADMIN")) {
+            MyResponse response = new MyResponse(403,"Forbidden");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
         return notificationService.sendNotification(userId, notificationTemplateId);
     }
 
@@ -155,7 +170,11 @@ public class NotificationController {
             @ApiResponse(responseCode = "405", description = "Validation error"),
             @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    public ResponseEntity<?> sendPopup(@PathVariable("id") Long notificationTemplateId) {
+    public ResponseEntity<?> sendPopup(@RequestHeader("X-USER-ROLE") String role, @PathVariable("id") Long notificationTemplateId) {
+        System.out.println("ROLE: "+role);
+        if (!role.equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ArrayList<>());
+        }
         return notificationService.sendPopup(notificationTemplateId);
     }
 }

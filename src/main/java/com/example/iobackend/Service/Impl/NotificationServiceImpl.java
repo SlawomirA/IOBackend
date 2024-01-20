@@ -9,7 +9,6 @@ import com.example.iobackend.Repository.NotificationTemplateRepository;
 import com.example.iobackend.Repository.UserRepository;
 import com.example.iobackend.Service.NotificationService;
 import com.example.iobackend.Utils.Helper;
-import com.example.iobackend.Utils.InteractionCreationer;
 import com.example.iobackend.Utils.MyMailSender;
 import org.springframework.messaging.MessagingException;
 import org.springframework.transaction.annotation.Transactional;
