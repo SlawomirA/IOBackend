@@ -135,7 +135,12 @@ public class NotificationController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "405", description = "Validation error")
     })
-    public ResponseEntity<MyResponse> updateNotificationTemplate(@Parameter(description = "ID of the template", example = "1") @PathVariable("id") Long notificationTemplateId, @RequestBody  NotificationTemplate notificationTemplate) {
+    public ResponseEntity<MyResponse> updateNotificationTemplate(@RequestHeader("X-USER-ROLE") String role,@Parameter(description = "ID of the template", example = "1") @PathVariable("id") Long notificationTemplateId, @RequestBody  NotificationTemplate notificationTemplate) {
+        System.out.println("ROLE: "+role);
+        if (!role.equals("ROLE_ADMIN")) {
+            MyResponse response = new MyResponse(403,"Forbidden");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
         return notificationService.updateNotificationTemplate(notificationTemplateId, notificationTemplate);
     }
 
